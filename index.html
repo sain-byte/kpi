@@ -184,10 +184,6 @@
         <label>Filter Skill</label>
         <select id="filterSkill">
           <option value="All">All Skill</option>
-          <option value="Inbound">Inbound</option>
-          <option value="Email">Email</option>
-          <option value="Live Chat">Live Chat</option>
-          <option value="Socmed">Socmed</option>
         </select>
       </div>
 
@@ -325,7 +321,7 @@
 <script>
   const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwwxR2HzyAx3WqCR7ikzId3kFkUM5Mlj5t598MfJN-qlGcJP67dJpQiGRvUWTayPyOD1g/exec";
 
-  let globalOptions = { years: [], months: [], weeks: [], biweeks: [], tls: [] };
+  let globalOptions = { years: [], months: [], weeks: [], biweeks: [], tls: [], skills: [] };
   let rawKpiData = [];
   let currentPage = 1;
   let sortState = { column: '', asc: true };
@@ -364,12 +360,12 @@
 
   let visibleFields = Object.assign({}, presets.page1);
 
+  // 1. OTOMATIS JALAN SAAT WEB PERTAMA KALI DIBUKA
   window.onload = function() {
     if (localStorage.getItem('kpiTheme') === 'dark') {
       document.body.classList.add('dark-mode');
     }
     
-    // Load Notes Header Config
     const savedNotesConf = localStorage.getItem('kpiNotesConfig');
     if (savedNotesConf) {
       try {
@@ -402,12 +398,54 @@
           tlSelect.innerHTML += `<option value="${tl}">${tl}</option>`;
         });
 
+        // POPULATE DROPDOWN SKILL SECARA DINAMIS DARI GSHEET (prod_section & m_agents)
+        const skillSelect = document.getElementById('filterSkill');
+        skillSelect.innerHTML = '<option value="All">All Skill</option>';
+        if (options.skills && options.skills.length > 0) {
+          options.skills.forEach(s => {
+            skillSelect.innerHTML += `<option value="${s}">${s}</option>`;
+          });
+        }
+
         updatePeriodOptions();
       })
       .catch(err => console.error("Error loading filters:", err));
   };
 
-  // Admin Auth Logic
+  // 2. VERIFIKASI PIN REAL-TIME KE BACKEND SAAT TOMBOL VERIFIKASI DIKLIK
+  function submitAdminPin() {
+    const pinInput = document.getElementById('inputAdminPin');
+    const pin = pinInput.value.trim();
+    
+    if (!pin) return alert("Masukkan PIN Admin!");
+
+    fetch(`${GAS_API_URL}?action=checkPin&pin=${encodeURIComponent(pin)}`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success) {
+          isAdminLoggedIn = true;
+          activeAdminPin = pin;
+
+          const btn = document.getElementById('btnAdmin');
+          btn.classList.add('logged-in');
+          btn.innerText = "🔓 Admin Active (Logout)";
+
+          closeAdminModal();
+          pinInput.value = '';
+          alert("✅ Login Admin Berhasil! Kolom keterangan siap diisi.");
+          renderCurrentPage();
+        } else {
+          alert("❌ PIN Admin Salah! Akses ditolak.");
+          pinInput.value = '';
+          pinInput.focus();
+        }
+      })
+      .catch(err => {
+        alert("Gagal terhubung ke server untuk verifikasi PIN.");
+        console.error(err);
+      });
+  }
+
   function toggleAdminLogin() {
     if (isAdminLoggedIn) {
       isAdminLoggedIn = false;
@@ -424,22 +462,6 @@
 
   function closeAdminModal() {
     document.getElementById('adminModal').style.display = 'none';
-  }
-
-  function submitAdminPin() {
-    const pin = document.getElementById('inputAdminPin').value;
-    if (!pin) return alert("Masukkan PIN!");
-
-    isAdminLoggedIn = true;
-    activeAdminPin = pin;
-
-    const btn = document.getElementById('btnAdmin');
-    btn.classList.add('logged-in');
-    btn.innerText = "🔓 Admin Active (Logout)";
-
-    closeAdminModal();
-    document.getElementById('inputAdminPin').value = '';
-    renderCurrentPage();
   }
 
   function toggleBadgeStyle() {
@@ -567,14 +589,12 @@
     };
     document.getElementById('pageTitle').innerText = titleMap[pageNum];
 
-    // Toggle Visible Area per Page
     document.getElementById('exportArea').style.display = pageNum === 4 ? 'none' : 'block';
     document.getElementById('mainActionBar').style.display = pageNum === 4 ? 'none' : 'flex';
     document.getElementById('columnPickerCard').style.display = pageNum === 4 ? 'none' : 'block';
     document.getElementById('notesConfigCard').style.display = pageNum === 4 ? 'none' : 'block';
     document.getElementById('analysStudioWorkspace').style.display = pageNum === 4 ? 'block' : 'none';
 
-    // Apply Presets Default Kolom
     if (pageNum === 1) visibleFields = Object.assign({}, presets.page1);
     if (pageNum === 2) visibleFields = Object.assign({}, presets.page2);
 
@@ -592,7 +612,6 @@
     renderCurrentPage();
   }
 
-  // FUNGSI AUTO-SAVE KE GSHEET + VALIDASI PIN ADMIN
   function saveNoteToSheet(inputEl, namaAgent, week, year, fieldName) {
     if (!isAdminLoggedIn) {
       alert("Akses Ditolak: Silakan login Admin terlebih dahulu!");
@@ -825,7 +844,6 @@
     }
   }
 
-  // FUNGSI DIAGNOSTIC ANALYS STUDIO (PAGE 4)
   function renderAnalysStudio() {
     if (!rawKpiData || rawKpiData.length === 0) return;
 
@@ -833,7 +851,6 @@
     let top5 = sorted.slice(0, 5);
     let bottom5 = sorted.slice(-5).reverse();
 
-    // Render Top 5
     let topHTML = '';
     top5.forEach((agent, i) => {
       topHTML += `
@@ -851,7 +868,6 @@
     });
     document.getElementById('top5AnalysList').innerHTML = topHTML;
 
-    // Render Bottom 5
     let bottomHTML = '';
     bottom5.forEach((agent, i) => {
       let cause = [];
