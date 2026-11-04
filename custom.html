@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KPI Agent - Custom Studio</title>
+  <title>KPI Agent - Custom Studio (Fixed Locked Groups)</title>
 
   <!-- Export & Chart Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
   <link rel="manifest" href="./site.webmanifest">
-  
+
   <style>
     :root {
       --bg-color: #f4f6f9;
@@ -78,7 +78,7 @@
     .filter-multi-select { height: 95px !important; min-width: 180px; }
     .btn-submit { background-color: #e91e63; color: white; border: none !important; font-weight: bold; cursor: pointer; height: 35px; }
 
-    /* Custom Rename & Reorder Studio Panel */
+    /* Custom Studio Panel */
     .custom-studio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 12px; display: none; }
     .custom-studio-grid.show { display: grid; }
     .studio-item { display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color); padding: 6px 8px; border-radius: 6px; font-size: 11px; }
@@ -140,7 +140,7 @@
   <!-- Top Navigation Header -->
   <header class="top-header">
     <div class="brand-title">
-      <span>🛠️</span> <span>KPI Agent - Custom Studio</span>
+      <span>🛠️</span> <span>KPI Agent - Custom Studio (Fixed Locked Groups)</span>
     </div>
     <div class="nav-buttons">
       <a href="index.html" class="nav-btn">Dashboard</a>
@@ -226,11 +226,11 @@
     </div>
   </div>
 
-  <!-- Custom Studio Panel (Rename & Reorder Kolom) -->
+  <!-- Custom Studio Panel -->
   <div class="card-box">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
       <div class="card-header-toggle" onclick="toggleCustomStudio()" style="flex: 1;">
-        <strong style="font-size: 12px; color: #e91e63;">🛠️ Custom Studio: Atur Nama & Urutan Kolom (Klik untuk Expand/Hide)</strong>
+        <strong style="font-size: 12px; color: #e91e63;">🛠️ Custom Studio: Sembunyikan, Ganti Nama & Urutan Kolom (Klik untuk Expand/Hide)</strong>
         <span id="studioToggleIcon" style="font-size: 14px; font-weight: bold; margin-left: 10px;">▼</span>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
@@ -319,32 +319,39 @@
   let isAdminLoggedIn = false;
   let activeAdminPin = "";
 
-  // Definisi Kolom Utama beserta urutan & nama default-nya
+  // Definisi Kolom Terkelompok Berdasarkan Kategori
   let defaultColumnDefs = [
-    { key: 'nama', label: 'NAMA', order: 1, show: true },
-    { key: 'team_leader', label: 'TEAM LEADER', order: 2, show: true },
-    { key: 'section', label: 'SKILL', order: 3, show: true },
-    { key: 'prodAch', label: 'PROD ACH', order: 4, show: true },
-    { key: 'prodTgt', label: 'PROD TGT', order: 5, show: true },
-    { key: 'prodResult', label: 'PROD RESULT', order: 6, show: true },
-    { key: 'prodPoint', label: 'PROD POIN', order: 7, show: true },
-    { key: 'qaAch', label: 'QA ACH', order: 8, show: true },
-    { key: 'qaTgt', label: 'QA TGT', order: 9, show: true },
-    { key: 'qaResult', label: 'QA RESULT', order: 10, show: true },
-    { key: 'qaPoint', label: 'QA POIN', order: 11, show: true },
-    { key: 'atdAch', label: 'ATD ACH', order: 12, show: true },
-    { key: 'atdTgt', label: 'ATD TGT', order: 13, show: true },
-    { key: 'atdResult', label: 'ATD RESULT', order: 14, show: true },
-    { key: 'atdPoint', label: 'ATD POIN', order: 15, show: true },
-    { key: 'allResult', label: 'ALL RESULT', order: 16, show: true },
-    { key: 'allPoinNoRules', label: 'ALL POIN', order: 17, show: true },
-    { key: 'rank', label: 'RANK', order: 18, show: true },
-    { key: 'keterangan_1', label: 'Keterangan', order: 19, show: true },
-    { key: 'keterangan_2', label: 'Action Plan', order: 20, show: true },
-    { key: 'keterangan_3', label: 'Status Note', order: 21, show: true }
+    { key: 'nama', label: 'NAMA', group: 'main', order: 1, show: true },
+    { key: 'team_leader', label: 'TEAM LEADER', group: 'main', order: 2, show: true },
+    { key: 'section', label: 'SKILL', group: 'main', order: 3, show: true },
+    
+    // Productivity Group
+    { key: 'prodAch', label: 'ACH', group: 'prod', order: 4, show: true },
+    { key: 'prodTgt', label: 'TGT', group: 'prod', order: 5, show: true },
+    { key: 'prodResult', label: 'RESULT', group: 'prod', order: 6, show: true },
+    { key: 'prodPoint', label: 'POIN', group: 'prod', order: 7, show: true },
+
+    // Quality Group
+    { key: 'qaAch', label: 'ACH', group: 'qa', order: 8, show: true },
+    { key: 'qaTgt', label: 'TGT', group: 'qa', order: 9, show: true },
+    { key: 'qaResult', label: 'RESULT', group: 'qa', order: 10, show: true },
+    { key: 'qaPoint', label: 'POIN', group: 'qa', order: 11, show: true },
+
+    // Attendance Group
+    { key: 'atdAch', label: 'ACH', group: 'atd', order: 12, show: true },
+    { key: 'atdTgt', label: 'TGT', group: 'atd', order: 13, show: true },
+    { key: 'atdResult', label: 'RESULT', group: 'atd', order: 14, show: true },
+    { key: 'atdPoint', label: 'POIN', group: 'atd', order: 15, show: true },
+
+    { key: 'allResult', label: 'ALL RESULT', group: 'main', order: 16, show: true },
+    { key: 'allPoinNoRules', label: 'ALL POIN', group: 'main', order: 17, show: true },
+    { key: 'rank', label: 'RANK', group: 'main', order: 18, show: true },
+    { key: 'keterangan_1', label: 'Keterangan', group: 'main', order: 19, show: true },
+    { key: 'keterangan_2', label: 'Action Plan', group: 'main', order: 20, show: true },
+    { key: 'keterangan_3', label: 'Status Note', group: 'main', order: 21, show: true }
   ];
 
-  let customColumns = JSON.parse(localStorage.getItem('kpiCustomColumns')) || defaultColumnDefs;
+  let customColumns = JSON.parse(localStorage.getItem('kpiCustomLocked')) || defaultColumnDefs;
 
   window.onload = function() {
     if (localStorage.getItem('kpiTheme') === 'dark') {
@@ -503,11 +510,9 @@
   function renderCustomStudioPanel() {
     const grid = document.getElementById('customStudioGrid');
     grid.innerHTML = '';
-
-    // Urutkan berdasarkan urutan kolom aktif saat ini
     customColumns.sort((a, b) => a.order - b.order);
 
-    customColumns.forEach((col, index) => {
+    customColumns.forEach((col) => {
       grid.innerHTML += `
         <div class="studio-item">
           <input type="checkbox" ${col.show ? 'checked' : ''} onchange="updateColShow('${col.key}', this.checked)" title="Tampilkan/Sembunyikan">
@@ -537,13 +542,13 @@
   }
 
   function saveAndRender() {
-    localStorage.setItem('kpiCustomColumns', JSON.stringify(customColumns));
+    localStorage.setItem('kpiCustomLocked', JSON.stringify(customColumns));
     renderTable();
   }
 
   function resetCustomStudio() {
     if (confirm("Reset pengaturan kolom ke default awal?")) {
-      localStorage.removeItem('kpiCustomColumns');
+      localStorage.removeItem('kpiCustomLocked');
       customColumns = JSON.parse(JSON.stringify(defaultColumnDefs));
       renderCustomStudioPanel();
       renderTable();
@@ -568,23 +573,16 @@
       tlMapping[tl].push(`${item.nama} (${sec})`);
 
       let ruleVal = String(item.cxRules || '').trim().toUpperCase();
-      if (ruleVal && ruleVal !== 'NO RULES' && ruleVal !== 'NO RULE') {
-        penaltyCount++;
-      }
-
+      if (ruleVal && ruleVal !== 'NO RULES' && ruleVal !== 'NO RULE') penaltyCount++;
       if (parseFloat(item.qaAch) < 90) qaDropCount++;
     });
 
     let secHtml = '';
-    for (let s in sectionCount) {
-      secHtml += `<div class="exec-item"><span>• ${s}</span><strong>${sectionCount[s]} agent</strong></div>`;
-    }
+    for (let s in sectionCount) secHtml += `<div class="exec-item"><span>• ${s}</span><strong>${sectionCount[s]} agent</strong></div>`;
     document.getElementById('execSectionBreakdown').innerHTML = secHtml || '<span style="opacity:0.6;">Kosong</span>';
 
     let tlHtml = '';
-    for (let t in tlMapping) {
-      tlHtml += `<div style="margin-bottom:6px;"><strong>📌 ${t} (${tlMapping[t].length}):</strong><br><span style="opacity:0.8; font-size:10.5px;">• ${tlMapping[t].join('<br>• ')}</span></div>`;
-    }
+    for (let t in tlMapping) tlHtml += `<div style="margin-bottom:6px;"><strong>📌 ${t} (${tlMapping[t].length}):</strong><br><span style="opacity:0.8; font-size:10.5px;">• ${tlMapping[t].join('<br>• ')}</span></div>`;
     document.getElementById('execTlMapping').innerHTML = tlHtml || '<span style="opacity:0.6;">Kosong</span>';
 
     let sortedTop = [...rawKpiData].sort((a, b) => b.allPoinNoRules - a.allPoinNoRules);
@@ -594,9 +592,7 @@
       <div class="exec-item" style="color:#c62828;"><span>⚠️ CX Penalty:</span><strong>${penaltyCount} Agent</strong></div>
       <div class="exec-item" style="color:#d35400;"><span>⚠️ QA < 90%:</span><strong>${qaDropCount} Agent</strong></div>
     `;
-    if (top1) {
-      alertHtml += `<div class="exec-item" style="color:#2e7d32; margin-top:4px;"><span>🏆 Top #1:</span><strong>${top1.nama} (Poin ${top1.allPoinNoRules})</strong></div>`;
-    }
+    if (top1) alertHtml += `<div class="exec-item" style="color:#2e7d32; margin-top:4px;"><span>🏆 Top #1:</span><strong>${top1.nama} (Poin ${top1.allPoinNoRules})</strong></div>`;
     document.getElementById('execAlerts').innerHTML = alertHtml;
   }
 
@@ -616,11 +612,7 @@
   }
 
   function saveNoteToSheet(inputEl, namaAgent, week, year, fieldName) {
-    if (!isAdminLoggedIn) {
-      alert("Akses Ditolak: Login Admin terlebih dahulu!");
-      return;
-    }
-
+    if (!isAdminLoggedIn) return alert("Akses Ditolak: Login Admin terlebih dahulu!");
     const val = inputEl.value;
     inputEl.classList.remove('saved');
     inputEl.classList.add('saving');
@@ -633,11 +625,8 @@
     .then(res => res.json())
     .then(res => {
       inputEl.classList.remove('saving');
-      if (res.success) {
-        inputEl.classList.add('saved');
-      } else {
-        alert("Gagal simpan: " + res.message);
-      }
+      if (res.success) inputEl.classList.add('saved');
+      else alert("Gagal simpan: " + res.message);
     });
   }
 
@@ -659,7 +648,6 @@
     }
 
     document.getElementById('resultCount').innerText = `${processedData.length} agent`;
-
     processedData.sort((a, b) => b.allPoinNoRules - a.allPoinNoRules);
     processedData.forEach((item, idx) => item.rank = idx + 1);
 
@@ -674,22 +662,49 @@
       });
     }
 
-    // Urutkan kolom berdasarkan custom order user
-    let sortedCols = [...customColumns].filter(c => c.show).sort((a, b) => a.order - b.order);
+    let activeCols = [...customColumns].filter(c => c.show).sort((a, b) => a.order - b.order);
     const disabledAttr = isAdminLoggedIn ? '' : 'disabled';
 
-    let headerHtml = '<tr>';
-    sortedCols.forEach(col => {
-      headerHtml += `<th onclick="handleSort('${col.key}')">${col.label}</th>`;
+    let mainBefore = activeCols.filter(c => c.group === 'main' && c.order <= 3);
+    let prodCols = activeCols.filter(c => c.group === 'prod');
+    let qaCols = activeCols.filter(c => c.group === 'qa');
+    let atdCols = activeCols.filter(c => c.group === 'atd');
+    let mainAfter = activeCols.filter(c => c.group === 'main' && c.order > 3);
+
+    // Susun ulang urutan render kolom secara utuh sesuai rumpun bertingkat yang benar
+    let finalOrderedCols = [...mainBefore, ...prodCols, ...qaCols, ...atdCols, ...mainAfter];
+
+    let topRow = '<tr>', botRow = '<tr>';
+
+    mainBefore.forEach(col => {
+      topRow += `<th rowspan="2" onclick="handleSort('${col.key}')">${col.label}</th>`;
     });
-    headerHtml += '</tr>';
-    thead.innerHTML = headerHtml;
+
+    if (prodCols.length > 0) {
+      topRow += `<th colspan="${prodCols.length}">PRODUCTIVITY 40%</th>`;
+      prodCols.forEach(c => botRow += `<th onclick="handleSort('${c.key}')">${c.label}</th>`);
+    }
+    if (qaCols.length > 0) {
+      topRow += `<th colspan="${qaCols.length}">QUALITY 50%</th>`;
+      qaCols.forEach(c => botRow += `<th onclick="handleSort('${c.key}')">${c.label}</th>`);
+    }
+    if (atdCols.length > 0) {
+      topRow += `<th colspan="${atdCols.length}">ATTENDANCE 10%</th>`;
+      atdCols.forEach(c => botRow += `<th onclick="handleSort('${c.key}')">${c.label}</th>`);
+    }
+
+    mainAfter.forEach(col => {
+      topRow += `<th rowspan="2" onclick="handleSort('${col.key}')">${col.label}</th>`;
+    });
+
+    topRow += '</tr>'; botRow += '</tr>';
+    thead.innerHTML = topRow + (prodCols.length > 0 || qaCols.length > 0 || atdCols.length > 0 ? botRow : '');
 
     processedData.forEach(item => {
       let tr = document.createElement('tr');
       let rowHtml = '';
 
-      sortedCols.forEach(col => {
+      finalOrderedCols.forEach(col => {
         let val = '';
         switch(col.key) {
           case 'nama': val = `<td style="text-align: left; font-weight: 600;">${item.nama}</td>`; break;
@@ -729,39 +744,26 @@
     renderCharts();
   }
 
-  function closeChartModal() {
-    document.getElementById('chartModal').style.display = 'none';
-  }
+  function closeChartModal() { document.getElementById('chartModal').style.display = 'none'; }
 
   function renderCharts() {
     if (chartInstances.bar) chartInstances.bar.destroy();
     if (chartInstances.donut) chartInstances.donut.destroy();
 
     let topData = [...rawKpiData].sort((a, b) => b.allPoinNoRules - a.allPoinNoRules).slice(0, 5);
-    
     const ctxBar = document.getElementById('barChart').getContext('2d');
     chartInstances.bar = new Chart(ctxBar, {
       type: 'bar',
-      data: {
-        labels: topData.map(d => d.nama),
-        datasets: [{ label: 'All Poin', data: topData.map(d => d.allPoinNoRules), backgroundColor: '#e91e63' }]
-      },
+      data: { labels: topData.map(d => d.nama), datasets: [{ label: 'All Poin', data: topData.map(d => d.allPoinNoRules), backgroundColor: '#e91e63' }] },
       options: { responsive: true, plugins: { legend: { display: false } } }
     });
 
     let pointCount = {};
-    rawKpiData.forEach(d => { 
-      let p = `Poin ${d.allPoinNoRules}`;
-      pointCount[p] = (pointCount[p] || 0) + 1; 
-    });
-
+    rawKpiData.forEach(d => { let p = `Poin ${d.allPoinNoRules}`; pointCount[p] = (pointCount[p] || 0) + 1; });
     const ctxDonut = document.getElementById('donutChart').getContext('2d');
     chartInstances.donut = new Chart(ctxDonut, {
       type: 'doughnut',
-      data: {
-        labels: Object.keys(pointCount),
-        datasets: [{ data: Object.values(pointCount), backgroundColor: ['#e91e63', '#1565c0', '#2e7d32', '#e67e22', '#8e44ad', '#f39c12'] }]
-      },
+      data: { labels: Object.keys(pointCount), datasets: [{ data: Object.values(pointCount), backgroundColor: ['#e91e63', '#1565c0', '#2e7d32', '#e67e22', '#8e44ad', '#f39c12'] }] },
       options: { responsive: true }
     });
   }
@@ -769,8 +771,8 @@
   function exportExcel() {
     const table = document.getElementById('kpiTable');
     const period = document.getElementById('filterValue').value;
-    const wb = XLSX.utils.table_to_book(table, { sheet: "Page3_CustomStudio" });
-    XLSX.writeFile(wb, `KPI_Custom_${period}.xlsx`);
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Page3_CustomLocked" });
+    XLSX.writeFile(wb, `KPI_CustomLocked_${period}.xlsx`);
   }
 
   function exportImage(type) {
@@ -778,7 +780,7 @@
     const period = document.getElementById('filterValue').value;
     html2canvas(area, { scale: 2 }).then(canvas => {
       const link = document.createElement('a');
-      link.download = `KPI_Custom_${period}.${type}`;
+      link.download = `KPI_CustomLocked_${period}.${type}`;
       link.href = canvas.toDataURL(`image/${type}`);
       link.click();
     });
