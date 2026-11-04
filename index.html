@@ -484,7 +484,7 @@
             : ''}
           <div class="avatar" style="${photoUrl ? 'display:none' : 'display:flex'}">${esc(initials || '?')}</div>
         </div>
-        <div><div class="hero-name">${esc(name)}</div><div class="hero-meta">Master Agent Data</div></div>
+        <div><div class="hero-name">${esc(name)}</div><div class="hero-meta">Agent</div></div>
       </div>
       <div class="detail-grid">
         ${detail('No', item.no)}
@@ -503,7 +503,7 @@
     if (!photo) return '';
     if (/^https?:\/\//i.test(photo)) return photo;
     // Default GitHub Pages photo directory; the Sheet may contain only "budi.jpg".
-    return `https://sain-byte.github.io/render/assets/agents/${encodeURIComponent(photo)}`;
+    return `https://sain-byte.github.io/kpi/assets/agents/${encodeURIComponent(photo)}`;
   }
 
   function detail(label, value) {
