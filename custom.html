@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>KPI Agent - Custom Studio (Fixed Locked Groups)</title>
+  <title>KPI Agent - Custom Studio (Dual Product Support)</title>
 
   <!-- Export & Chart Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -21,7 +21,7 @@
       --card-bg: #ffffff;
       --text-color: #333333;
       --border-color: #e0e0e0;
-      --header-th-bg: #e91e63; /* Merah Magenta */
+      --header-th-bg: #e91e63;
       --header-th-border: #c2185b;
       --row-even: #f9f9f9;
       --row-hover: #f1f1f1;
@@ -140,7 +140,7 @@
   <!-- Top Navigation Header -->
   <header class="top-header">
     <div class="brand-title">
-      <span>🛠️</span> <span>KPI Agent - Custom Studio</span>
+      <span>🛠️</span> <span>KPI Agent - Custom Studio (Dual Product Support)</span>
     </div>
     <div class="nav-buttons">
       <a href="index.html" class="nav-btn">Dashboard</a>
@@ -319,39 +319,41 @@
   let isAdminLoggedIn = false;
   let activeAdminPin = "";
 
-  // Definisi Kolom Terkelompok Berdasarkan Kategori
+  // Definisi Kolom Terkelompok Termasuk Kolom Dual Product (Kapture & Sociomile)
   let defaultColumnDefs = [
     { key: 'nama', label: 'NAMA', group: 'main', order: 1, show: true },
     { key: 'team_leader', label: 'TEAM LEADER', group: 'main', order: 2, show: true },
     { key: 'section', label: 'SKILL', group: 'main', order: 3, show: true },
     
-    // Productivity Group
-    { key: 'prodAch', label: 'ACH', group: 'prod', order: 4, show: true },
-    { key: 'prodTgt', label: 'TGT', group: 'prod', order: 5, show: true },
-    { key: 'prodResult', label: 'RESULT', group: 'prod', order: 6, show: true },
-    { key: 'prodPoint', label: 'POIN', group: 'prod', order: 7, show: true },
+    // Productivity Group (Dual Product Support)
+    { key: 'prodKapture', label: 'KAPTURE', group: 'prod', order: 4, show: true },
+    { key: 'prodSociomile', label: 'SOCIOMILE', group: 'prod', order: 5, show: true },
+    { key: 'prodAch', label: 'TOTAL ACH', group: 'prod', order: 6, show: true },
+    { key: 'prodTgt', label: 'TGT', group: 'prod', order: 7, show: true },
+    { key: 'prodResult', label: 'RESULT', group: 'prod', order: 8, show: true },
+    { key: 'prodPoint', label: 'POIN', group: 'prod', order: 9, show: true },
 
     // Quality Group
-    { key: 'qaAch', label: 'ACH', group: 'qa', order: 8, show: true },
-    { key: 'qaTgt', label: 'TGT', group: 'qa', order: 9, show: true },
-    { key: 'qaResult', label: 'RESULT', group: 'qa', order: 10, show: true },
-    { key: 'qaPoint', label: 'POIN', group: 'qa', order: 11, show: true },
+    { key: 'qaAch', label: 'ACH', group: 'qa', order: 10, show: true },
+    { key: 'qaTgt', label: 'TGT', group: 'qa', order: 11, show: true },
+    { key: 'qaResult', label: 'RESULT', group: 'qa', order: 12, show: true },
+    { key: 'qaPoint', label: 'POIN', group: 'qa', order: 13, show: true },
 
     // Attendance Group
-    { key: 'atdAch', label: 'ACH', group: 'atd', order: 12, show: true },
-    { key: 'atdTgt', label: 'TGT', group: 'atd', order: 13, show: true },
-    { key: 'atdResult', label: 'RESULT', group: 'atd', order: 14, show: true },
-    { key: 'atdPoint', label: 'POIN', group: 'atd', order: 15, show: true },
+    { key: 'atdAch', label: 'ACH', group: 'atd', order: 14, show: true },
+    { key: 'atdTgt', label: 'TGT', group: 'atd', order: 15, show: true },
+    { key: 'atdResult', label: 'RESULT', group: 'atd', order: 16, show: true },
+    { key: 'atdPoint', label: 'POIN', group: 'atd', order: 17, show: true },
 
-    { key: 'allResult', label: 'ALL RESULT', group: 'main', order: 16, show: true },
-    { key: 'allPoinNoRules', label: 'ALL POIN', group: 'main', order: 17, show: true },
-    { key: 'rank', label: 'RANK', group: 'main', order: 18, show: true },
-    { key: 'keterangan_1', label: 'Keterangan', group: 'main', order: 19, show: true },
-    { key: 'keterangan_2', label: 'Action Plan', group: 'main', order: 20, show: true },
-    { key: 'keterangan_3', label: 'Status Note', group: 'main', order: 21, show: true }
+    { key: 'allResult', label: 'ALL RESULT', group: 'main', order: 18, show: true },
+    { key: 'allPoinNoRules', label: 'ALL POIN', group: 'main', order: 19, show: true },
+    { key: 'rank', label: 'RANK', group: 'main', order: 20, show: true },
+    { key: 'keterangan_1', label: 'Keterangan', group: 'main', order: 21, show: true },
+    { key: 'keterangan_2', label: 'Action Plan', group: 'main', order: 22, show: true },
+    { key: 'keterangan_3', label: 'Status Note', group: 'main', order: 23, show: true }
   ];
 
-  let customColumns = JSON.parse(localStorage.getItem('kpiCustomLocked')) || defaultColumnDefs;
+  let customColumns = JSON.parse(localStorage.getItem('kpiCustomLockedDualV2')) || defaultColumnDefs;
 
   window.onload = function() {
     if (localStorage.getItem('kpiTheme') === 'dark') {
@@ -542,13 +544,13 @@
   }
 
   function saveAndRender() {
-    localStorage.setItem('kpiCustomLocked', JSON.stringify(customColumns));
+    localStorage.setItem('kpiCustomLockedDualV2', JSON.stringify(customColumns));
     renderTable();
   }
 
   function resetCustomStudio() {
     if (confirm("Reset pengaturan kolom ke default awal?")) {
-      localStorage.removeItem('kpiCustomLocked');
+      localStorage.removeItem('kpiCustomLockedDualV2');
       customColumns = JSON.parse(JSON.stringify(defaultColumnDefs));
       renderCustomStudioPanel();
       renderTable();
@@ -574,7 +576,8 @@
 
       let ruleVal = String(item.cxRules || '').trim().toUpperCase();
       if (ruleVal && ruleVal !== 'NO RULES' && ruleVal !== 'NO RULE') penaltyCount++;
-      if (parseFloat(item.qaAch) < 90) qaDropCount++;
+      let qaValNum = parseFloat(item.qaAch) || 0;
+      if (qaValNum < 90) qaDropCount++;
     });
 
     let secHtml = '';
@@ -671,7 +674,6 @@
     let atdCols = activeCols.filter(c => c.group === 'atd');
     let mainAfter = activeCols.filter(c => c.group === 'main' && c.order > 3);
 
-    // Susun ulang urutan render kolom secara utuh sesuai rumpun bertingkat yang benar
     let finalOrderedCols = [...mainBefore, ...prodCols, ...qaCols, ...atdCols, ...mainAfter];
 
     let topRow = '<tr>', botRow = '<tr>';
@@ -710,6 +712,8 @@
           case 'nama': val = `<td style="text-align: left; font-weight: 600;">${item.nama}</td>`; break;
           case 'team_leader': val = `<td>${item.team_leader}</td>`; break;
           case 'section': val = `<td>${item.section}</td>`; break;
+          case 'prodKapture': val = `<td>${item.prodKapture || 0}</td>`; break;
+          case 'prodSociomile': val = `<td>${item.prodSociomile || 0}</td>`; break;
           case 'prodAch': val = `<td>${item.prodAch}</td>`; break;
           case 'prodTgt': val = `<td>${item.prodTgt}</td>`; break;
           case 'prodResult': val = `<td>${item.prodResult}</td>`; break;
@@ -771,8 +775,8 @@
   function exportExcel() {
     const table = document.getElementById('kpiTable');
     const period = document.getElementById('filterValue').value;
-    const wb = XLSX.utils.table_to_book(table, { sheet: "Page3_CustomLocked" });
-    XLSX.writeFile(wb, `KPI_CustomLocked_${period}.xlsx`);
+    const wb = XLSX.utils.table_to_book(table, { sheet: "Page3_CustomDual" });
+    XLSX.writeFile(wb, `KPI_CustomDual_${period}.xlsx`);
   }
 
   function exportImage(type) {
@@ -780,7 +784,7 @@
     const period = document.getElementById('filterValue').value;
     html2canvas(area, { scale: 2 }).then(canvas => {
       const link = document.createElement('a');
-      link.download = `KPI_CustomLocked_${period}.${type}`;
+      link.download = `KPI_CustomDual_${period}.${type}`;
       link.href = canvas.toDataURL(`image/${type}`);
       link.click();
     });
